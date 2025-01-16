@@ -41,15 +41,19 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  accounts      Account[]
-  sessions      Session[]
-  reviews       Review[]
+  id                    String    @id @default(cuid())
+  name                  String?
+  email                 String?   @unique
+  emailVerified         DateTime?
+  image                 String?
+  password              String?
+  verificationToken     String?   @unique
+  verified              Boolean   @default(false)
+  resetToken           String?   @unique
+  resetTokenExpires    DateTime?
+  accounts              Account[]
+  sessions              Session[]
+  reviews               Review[]
 }
 
 model Restaurant {
@@ -69,18 +73,18 @@ model Review {
   id           String     @id @default(cuid())
   rating       Int
   comment      String?
-  user         User       @relation(fields: [userId], references: [id])
   userId       String
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
   restaurantId String
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+  user         User       @relation(fields: [userId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
 }
 
 model Image {
   id           String     @id @default(cuid())
   url          String
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
   restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
   createdAt    DateTime   @default(now())
 }

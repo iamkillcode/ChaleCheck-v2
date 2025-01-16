@@ -29,8 +29,8 @@ export default function Login() {
       }
 
       if (res?.ok) {
-        router.push('/'); // Redirect to home page after successful login
-        router.refresh(); // Refresh to update session state
+        router.push('/');
+        router.refresh();
       }
     } catch (error: any) {
       setError(error.message);
@@ -75,6 +75,15 @@ export default function Login() {
               required
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
             />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Link 
+              href="/forgot-password" 
+              className="text-sm text-blue-500 hover:text-blue-600"
+            >
+              Forgot your password?
+            </Link>
           </div>
 
           <button
