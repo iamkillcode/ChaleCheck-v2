@@ -1,10 +1,11 @@
 [build]
-  command = "npm run build"
+  command = "prisma generate && next build"
   publish = ".next"
 
 [build.environment]
-  NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME = ""
+  NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME = "dtybwto2n"
   NODE_VERSION = "18"
+  PRISMA_CLI_QUERY_ENGINE_TYPE = "binary"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -20,4 +21,17 @@
 
 [dev]
   command = "npm run dev"
-  targetPort = 3000 
+  targetPort = 3000
+
+[build.processing]
+  skip_processing = false
+[build.processing.css]
+  bundle = true
+  minify = true
+[build.processing.js]
+  bundle = true
+  minify = true
+[build.processing.html]
+  pretty_urls = true
+[build.processing.images]
+  compress = true 

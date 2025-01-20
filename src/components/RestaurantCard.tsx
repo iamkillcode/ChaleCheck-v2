@@ -2,20 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Star, MapPin, Clock, DollarSign } from 'lucide-react';
 import { CldImage } from 'next-cloudinary';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import FavoriteButton from './FavoriteButton';
 import { Restaurant } from '@/types/restaurant';
-
-const priceRangeMap = {
-  1: { label: '$', description: 'Inexpensive' },
-  2: { label: '$$', description: 'Moderate' },
-  3: { label: '$$$', description: 'Expensive' },
-  4: { label: '$$$$', description: 'Very Expensive' },
-};
 
 interface RestaurantCardProps {
   restaurant: Restaurant;

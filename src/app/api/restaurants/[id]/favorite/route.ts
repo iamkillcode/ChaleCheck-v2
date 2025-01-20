@@ -9,28 +9,38 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { error: "You must be logged in to favorite restaurants" },
+        { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const user = await prisma.user.update({
-      where: { email: session.user.email! },
-      data: {
-        favorites: {
-          connect: { id: params.id }
-        }
-      }
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
     });
 
-    return NextResponse.json({ message: "Restaurant added to favorites" });
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    await prisma.restaurant.update({
+      where: { id: params.id },
+      data: {
+        favoritedBy: {
+          connect: { id: currentUser.id },
+        },
+      },
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error adding favorite:', error);
     return NextResponse.json(
-      { error: "Failed to add favorite" },
+      { error: 'Failed to add favorite' },
       { status: 500 }
     );
   }
@@ -42,28 +52,38 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { error: "You must be logged in to manage favorites" },
+        { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const user = await prisma.user.update({
-      where: { email: session.user.email! },
-      data: {
-        favorites: {
-          disconnect: { id: params.id }
-        }
-      }
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
     });
 
-    return NextResponse.json({ message: "Restaurant removed from favorites" });
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    await prisma.restaurant.update({
+      where: { id: params.id },
+      data: {
+        favoritedBy: {
+          disconnect: { id: currentUser.id },
+        },
+      },
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error removing favorite:', error);
     return NextResponse.json(
-      { error: "Failed to remove favorite" },
+      { error: 'Failed to remove favorite' },
       { status: 500 }
     );
   }
