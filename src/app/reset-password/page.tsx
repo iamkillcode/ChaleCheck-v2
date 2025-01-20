@@ -2,24 +2,26 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default function ResetPassword() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
     setError('');
     setSuccess('');
-    setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const password = formData.get('password');
-    const confirmPassword = formData.get('confirmPassword');
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -28,24 +30,26 @@ export default function ResetPassword() {
     }
 
     try {
-      const res = await fetch('/api/auth/reset-password/confirm', {
-        method: 'POST',
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ token, password }),
       });
 
-      const data = await res.json();
+      const data = await response.json();
 
-      if (!res.ok) {
+      if (!response.ok) {
         throw new Error(data.error || 'Failed to reset password');
       }
 
       setSuccess('Password reset successful! Redirecting to login...');
-      setTimeout(() => router.push('/login'), 2000);
-    } catch (error: any) {
-      setError(error.message);
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reset password');
     } finally {
       setIsLoading(false);
     }
@@ -73,12 +77,12 @@ export default function ResetPassword() {
             <label htmlFor="password" className="block text-sm font-medium">
               New Password
             </label>
-            <input
+            <Input
               type="password"
               name="password"
               id="password"
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              className="mt-1"
             />
           </div>
 
@@ -86,22 +90,22 @@ export default function ResetPassword() {
             <label htmlFor="confirmPassword" className="block text-sm font-medium">
               Confirm Password
             </label>
-            <input
+            <Input
               type="password"
               name="confirmPassword"
               id="confirmPassword"
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              className="mt-1"
             />
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 disabled:bg-blue-300"
+            className="w-full"
           >
             {isLoading ? 'Resetting...' : 'Reset Password'}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

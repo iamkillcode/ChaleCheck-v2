@@ -2,25 +2,25 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default function ForgotPassword() {
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
     setError('');
     setSuccess('');
-    setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email');
+    const email = formData.get('email') as string;
 
     try {
-      console.log('Sending reset request for:', email);
-      
-      const res = await fetch('/api/auth/reset-password', {
+      const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,30 +28,15 @@ export default function ForgotPassword() {
         body: JSON.stringify({ email }),
       });
 
-      console.log('Response status:', res.status);
-      
-      // Check if the response is ok before trying to parse JSON
-      if (!res.ok) {
-        const text = await res.text();
-        console.error('Error response:', text);
-        throw new Error('Failed to send reset email');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send reset email');
       }
 
-      const text = await res.text();
-      console.log('Response text:', text);
-
-      let data;
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch (e) {
-        console.error('JSON parse error:', e);
-        throw new Error('Invalid server response');
-      }
-
-      setSuccess('If an account exists with this email, you will receive password reset instructions.');
-    } catch (error: any) {
-      console.error('Reset request error:', error);
-      setError(error.message || 'Something went wrong');
+      setSuccess(data.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send reset email');
     } finally {
       setIsLoading(false);
     }
@@ -79,22 +64,22 @@ export default function ForgotPassword() {
             <label htmlFor="email" className="block text-sm font-medium">
               Email Address
             </label>
-            <input
+            <Input
               type="email"
               name="email"
               id="email"
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              className="mt-1"
             />
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 disabled:bg-blue-300"
+            className="w-full"
           >
             {isLoading ? 'Sending...' : 'Send Reset Link'}
-          </button>
+          </Button>
         </form>
 
         <p className="mt-4 text-center">

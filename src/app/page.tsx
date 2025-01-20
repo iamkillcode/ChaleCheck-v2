@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import RestaurantCard from '@/components/RestaurantCard';
 import { Restaurant } from '@/types/restaurant';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Review } from '@/types/review';
 import Layout from '@/components/Layout';
 
 const popularCuisines = [
@@ -63,8 +62,8 @@ export default function HomePage() {
           trending: data.slice(0, 3),
           new: data.filter((r: Restaurant) => r.isNew).slice(0, 3),
           top: data.sort((a: Restaurant, b: Restaurant) => {
-            const aRating = a.reviews.reduce((acc: number, r: Review) => acc + r.rating, 0) / a.reviews.length;
-            const bRating = b.reviews.reduce((acc: number, r: Review) => acc + r.rating, 0) / b.reviews.length;
+            const aRating = a.reviews.length ? a.reviews.reduce((acc, r) => acc + r.rating, 0) / a.reviews.length : 0;
+            const bRating = b.reviews.length ? b.reviews.reduce((acc, r) => acc + r.rating, 0) / b.reviews.length : 0;
             return bRating - aRating;
           }).slice(0, 3),
         });

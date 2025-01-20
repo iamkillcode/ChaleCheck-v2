@@ -39,8 +39,14 @@ export default function RestaurantDetails({ params }: { params: Promise<{ id: st
       if (!res.ok) throw new Error('Failed to fetch restaurant details');
       const data = await res.json();
       setRestaurant(data);
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error fetching restaurant:', error.message);
+        setError(error.message);
+      } else {
+        console.error('Error fetching restaurant:', error);
+        setError('An unexpected error occurred');
+      }
     } finally {
       setLoading(false);
     }
@@ -95,7 +101,7 @@ export default function RestaurantDetails({ params }: { params: Promise<{ id: st
           {session?.user && (
             <ReviewForm 
               restaurantId={restaurant.id} 
-              onReviewAdded={fetchRestaurantData}
+              onReviewAdded={() => fetchRestaurantData(restaurant.id)}
             />
           )}
 

@@ -1,16 +1,15 @@
-export interface User {
-  id: string;
-  name: string | null;
-  email: string | null;
-  image: string | null;
-}
+// import { User } from './user'
 
-export interface Review {
+export interface RestaurantReview {
   id: string;
   rating: number;
   comment: string;
   createdAt: string;
-  user: User;
+  user: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
 }
 
 export interface Restaurant {
@@ -22,8 +21,8 @@ export interface Restaurant {
   cuisine?: string;
   priceLevel?: 1 | 2 | 3 | 4;
   images?: string[];
-  reviews: Review[];
-  favoritedBy?: User[];
+  reviews: RestaurantReview[];
+  favoritedBy?: { email: string }[];
   isFavorited?: boolean;
   isNew?: boolean;
   createdAt: string;

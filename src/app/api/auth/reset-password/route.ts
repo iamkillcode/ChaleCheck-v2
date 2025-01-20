@@ -1,19 +1,16 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/email";
 import crypto from "crypto";
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
     // Log the incoming request
     console.log('Received password reset request');
     
-    // Parse the request body
-    const body = await request.json();
-    console.log('Request body:', body);
+    const { email } = await req.json();
+    console.log('Request body:', email);
     
-    const { email } = body;
-
     if (!email) {
       console.log('No email provided');
       return NextResponse.json({ 
@@ -26,37 +23,38 @@ export async function POST(request: Request) {
       where: { email }
     });
 
-    // Generate reset token even if user doesn't exist (security best practice)
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const tokenExpires = new Date(Date.now() + 3600000); // 1 hour from now
-
-    if (user) {
-      console.log('User found, updating reset token');
-      
-      // Update user with reset token
-      await prisma.user.update({
-        where: { email },
-        data: {
-          resetToken,
-          resetTokenExpires: tokenExpires
-        }
+    if (!user) {
+      // Return success even if user doesn't exist for security
+      return NextResponse.json({
+        message: "If an account exists with this email, you will receive password reset instructions.",
       });
-
-      // Send email
-      try {
-        await sendPasswordResetEmail(email, resetToken);
-        console.log('Reset email sent successfully');
-      } catch (emailError) {
-        console.error('Error sending reset email:', emailError);
-        return NextResponse.json({ 
-          error: "Failed to send reset email" 
-        }, { status: 500 });
-      }
     }
 
-    // Always return success (security best practice)
-    return NextResponse.json({ 
-      message: "If an account exists with this email, you will receive password reset instructions." 
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hour from now
+
+    await prisma.user.update({
+      where: { email },
+      data: {
+        resetToken,
+        resetTokenExpires,
+      },
+    });
+
+    // Send email
+    try {
+      await sendPasswordResetEmail(email, resetToken);
+      console.log('Reset email sent successfully');
+    } catch (emailError) {
+      console.error('Error sending reset email:', emailError);
+      return NextResponse.json({ 
+        error: "Failed to send reset email" 
+      }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      message: "If an account exists with this email, you will receive password reset instructions.",
     });
 
   } catch (error) {

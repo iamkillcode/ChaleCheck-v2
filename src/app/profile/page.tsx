@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Layout from '@/components/Layout';
 
+interface User {
+  id: string;
+  name: string | null;
+  email: string | null;
+  image: string | null;
+}
+
 interface Review {
   id: string;
   rating: number;
@@ -17,7 +24,7 @@ interface Review {
 
 export default function UserProfile() {
   const { data: session } = useSession();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,8 +40,12 @@ export default function UserProfile() {
         }
         const data = await res.json();
         setUser(data);
-      } catch (error: any) {
-        setError(error.message);
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError('An unexpected error occurred');
+        }
       } finally {
         setLoading(false);
       }
@@ -50,8 +61,12 @@ export default function UserProfile() {
         }
         const data = await res.json();
         setReviews(data);
-      } catch (error: any) {
-        setError(error.message);
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError('An unexpected error occurred');
+        }
       }
     };
 

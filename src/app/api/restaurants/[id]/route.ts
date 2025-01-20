@@ -1,14 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { Prisma } from "@prisma/client";
-import bcrypt from 'bcryptjs';
-
-
 
 export async function GET(
-  request: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -38,6 +35,12 @@ export async function GET(
     return NextResponse.json(restaurant);
   } catch (error) {
     console.error('Error fetching restaurant:', error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return NextResponse.json(
+        { error: 'Database error occurred' },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to fetch restaurant' },
       { status: 500 }
@@ -46,7 +49,7 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -58,7 +61,7 @@ export async function PATCH(
       );
     }
 
-    const data = await request.json();
+    const data = await req.json();
     const restaurant = await prisma.restaurant.update({
       where: { id: params.id },
       data,
@@ -67,6 +70,18 @@ export async function PATCH(
     return NextResponse.json(restaurant);
   } catch (error) {
     console.error('Error updating restaurant:', error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025') {
+        return NextResponse.json(
+          { error: 'Restaurant not found' },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json(
+        { error: 'Database error occurred' },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to update restaurant' },
       { status: 500 }
@@ -75,7 +90,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -94,6 +109,18 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting restaurant:', error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025') {
+        return NextResponse.json(
+          { error: 'Restaurant not found' },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json(
+        { error: 'Database error occurred' },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to delete restaurant' },
       { status: 500 }

@@ -1,67 +1,59 @@
-import { NextResponse } from "next/server";
-import bcrypt from "bcrypt";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+import { sendVerificationEmail } from "@/lib/email";
+import crypto from "crypto";
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    // Log the raw request
-    const rawBody = await request.text();
-    console.log('Raw request body:', rawBody);
+    const { name, email, password } = await req.json();
 
-    // Parse the JSON
-    const body = JSON.parse(rawBody);
-    console.log('Parsed body:', body);
-
-    const { email, name, password } = body;
-
-    if (!email || !name || !password) {
-      console.log('Missing fields:', { email: !!email, name: !!name, password: !!password });
+    if (!email || !password) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Email and password are required" },
         { status: 400 }
       );
     }
 
-    try {
-      const existingUser = await prisma.user.findUnique({
-        where: { email }
-      });
+    // Check if user exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
 
-      if (existingUser) {
-        return NextResponse.json(
-          { error: "Email already exists" },
-          { status: 400 }
-        );
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 12);
-
-      const user = await prisma.user.create({
-        data: {
-          email,
-          name,
-          password: hashedPassword
-        }
-      });
-
-      console.log('User created successfully:', { email: user.email, name: user.name });
-
+    if (existingUser) {
       return NextResponse.json(
-        { user: { email: user.email, name: user.name } },
-        { status: 201 }
-      );
-    } catch (dbError) {
-      console.error('Database operation failed:', dbError);
-      return NextResponse.json(
-        { error: "Failed to create user in database" },
-        { status: 500 }
+        { error: "Email already registered" },
+        { status: 400 }
       );
     }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
+    // Create user
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        verificationToken,
+      },
+    });
+
+    // Send verification email
+    await sendVerificationEmail(email, verificationToken);
+
+    return NextResponse.json({
+      message: "Registration successful. Please check your email to verify your account.",
+    });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "Invalid request data" },
-      { status: 400 }
+      { error: "Failed to register user" },
+      { status: 500 }
     );
   }
 } 

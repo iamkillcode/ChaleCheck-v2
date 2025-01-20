@@ -8,8 +8,8 @@ import ReviewForm from '@/components/ReviewForm'
 import FavoriteButton from '@/components/FavoriteButton'
 import { Restaurant } from '@/types/restaurant'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import AvatarComponent from "@/components/ui/avatar-component"
 
 interface RestaurantDetailsProps {
   restaurant: Restaurant
@@ -96,10 +96,13 @@ export default function RestaurantDetails({ restaurant, session }: RestaurantDet
                     <CardContent className="pt-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center">
-                          <Avatar className="h-10 w-10 mr-3">
-                            <AvatarImage src={review.user.image || undefined} alt={review.user.name || ''} />
-                            <AvatarFallback>{review.user.name?.charAt(0) || '?'}</AvatarFallback>
-                          </Avatar>
+                          <div className="mr-3">
+                            <AvatarComponent 
+                              src={review.user.image || undefined} 
+                              alt={review.user.name || ''} 
+                              fallback={review.user.name?.charAt(0) || '?'} 
+                            />
+                          </div>
                           <div>
                             <p className="font-medium">{review.user.name}</p>
                             <p className="text-sm text-gray-500">

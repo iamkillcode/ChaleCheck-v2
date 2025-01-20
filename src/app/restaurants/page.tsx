@@ -3,13 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
-
-interface Restaurant {
-  id: string;
-  name: string;
-  address: string;
-  cuisine: string | null;
-}
+import { Restaurant } from '@/types/restaurant';
 
 export default function RestaurantList() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -26,7 +20,13 @@ export default function RestaurantList() {
         setRestaurants(data);
         
         // Extract unique cuisine types
-        const uniqueCuisines = [...new Set(data.map((r: Restaurant) => r.cuisine).filter(Boolean))];
+        const uniqueCuisines = Array.from(new Set(
+          data
+            .map((r: Restaurant) => r.cuisine)
+            .filter((cuisine: string | undefined): cuisine is string => 
+              typeof cuisine === 'string'
+            )
+        )) as string[];
         setCuisineTypes(uniqueCuisines);
       } catch (error) {
         console.error('Error fetching restaurants:', error);
