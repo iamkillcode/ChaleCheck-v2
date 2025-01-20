@@ -7,8 +7,8 @@ import { authOptions } from "@/lib/auth";
 export const dynamic = 'force-dynamic';
 
 export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ export async function POST(
       );
     }
 
-    const restaurantId = params.id;
+    const restaurantId = context.params.id;
     const userEmail = session.user.email;
 
     // Update the restaurant to add the user to favoritedBy
@@ -47,8 +47,8 @@ export async function POST(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -61,7 +61,7 @@ export async function DELETE(
 
     // Update the restaurant to remove the user from favoritedBy
     const restaurant = await prisma.restaurant.update({
-      where: { id: params.id },
+      where: { id: context.params.id },
       data: {
         favoritedBy: {
           disconnect: { email: session.user.email }
