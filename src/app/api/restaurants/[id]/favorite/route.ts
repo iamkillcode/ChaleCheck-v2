@@ -1,83 +1,80 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
-// Next.js 13+ route segment config
+// Define correct route segment config
 export const dynamic = 'force-dynamic';
 
-export async function POST(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+// Remove incorrect type definition
+// type RouteSegment = { ... }
+
+async function updateFavoriteStatus(restaurantId: string, userEmail: string, isFavorite: boolean) {
+  const user = await prisma.user.findUnique({
+    where: { email: userEmail }
+  });
+
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  return await prisma.restaurant.update({
+    where: { id: restaurantId },
+    data: {
+      favoritedBy: isFavorite 
+        ? { connect: { id: user.id } }
+        : { disconnect: { id: user.id } }
+    },
+    include: {
+      favoritedBy: true
+    }
+  });
+}
+
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "You must be logged in to favorite a restaurant" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const restaurantId = context.params.id;
-    const userEmail = session.user.email;
+    // Get restaurantId from URL
+    const restaurantId = request.url.split('/restaurants/')[1].split('/favorite')[0];
 
-    // Update the restaurant to add the user to favoritedBy
-    const restaurant = await prisma.restaurant.update({
-      where: { id: restaurantId },
-      data: {
-        favoritedBy: {
-          connect: { email: userEmail }
-        }
-      },
-      include: {
-        favoritedBy: true
-      }
-    });
-
-    return NextResponse.json(restaurant, { status: 201 });
+    const restaurant = await updateFavoriteStatus(restaurantId, session.user.email, true);
+    return NextResponse.json(restaurant);
   } catch (error) {
-    console.error('Error favoriting restaurant:', error);
-    return NextResponse.json(
-      { error: "Failed to favorite restaurant" },
-      { status: 500 }
-    );
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message }, 
+        { status: error.message === "Unauthorized" ? 401 : 500 }
+      );
+    }
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+    
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Update the restaurant to remove the user from favoritedBy
-    const restaurant = await prisma.restaurant.update({
-      where: { id: context.params.id },
-      data: {
-        favoritedBy: {
-          disconnect: { email: session.user.email }
-        }
-      },
-      include: {
-        favoritedBy: true
-      }
-    });
+    // Get restaurantId from URL
+    const restaurantId = request.url.split('/restaurants/')[1].split('/favorite')[0];
 
+    const restaurant = await updateFavoriteStatus(restaurantId, session.user.email, false);
     return NextResponse.json(restaurant);
   } catch (error) {
-    console.error('Error removing favorite:', error);
-    return NextResponse.json(
-      { error: 'Failed to remove favorite' },
-      { status: 500 }
-    );
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message }, 
+        { status: error.message === "Unauthorized" ? 401 : 500 }
+      );
+    }
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
   }
 }

@@ -9,7 +9,7 @@ interface Restaurant {
 }
 
 async function scrapeRestaurants(): Promise<void> {
-  const browser = await puppeteer.launch({ headless: 'new' });
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
 
   try {

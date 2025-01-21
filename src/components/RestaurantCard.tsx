@@ -46,7 +46,7 @@ export default function RestaurantCard({
             <div className="absolute top-2 right-2 z-10">
               <FavoriteButton
                 restaurantId={restaurant.id}
-                initialIsFavorited={restaurant.isFavorited}
+                initialIsFavorited={restaurant.isFavorited ?? false}
               />
             </div>
           )}

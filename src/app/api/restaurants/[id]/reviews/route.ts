@@ -1,12 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
@@ -17,6 +14,8 @@ export async function POST(
       );
     }
 
+    // Extract restaurant ID from URL
+    const restaurantId = request.url.split('/restaurants/')[1].split('/reviews')[0];
     const { rating, comment } = await request.json();
 
     if (!rating || !comment) {
@@ -31,7 +30,7 @@ export async function POST(
         rating,
         comment,
         user: { connect: { email: session.user.email! } },
-        restaurant: { connect: { id: params.id } },
+        restaurant: { connect: { id: restaurantId } },
       },
       include: {
         user: {

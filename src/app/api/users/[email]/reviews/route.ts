@@ -1,10 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: Request, { params }: { params: { email: string } }) {
+export async function GET(request: NextRequest) {
   try {
+    // Extract email from URL
+    const email = request.url.split('/users/')[1].split('/reviews')[0];
+
     const reviews = await prisma.review.findMany({
-      where: { user: { email: params.email } },
+      where: { user: { email } },
       include: {
         restaurant: {
           select: {
