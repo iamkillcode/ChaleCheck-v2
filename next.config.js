@@ -7,18 +7,18 @@ const nextConfig = {
   images: {
     domains: ['res.cloudinary.com'],
   },
-  swcMinify: true, // Re-enable for production
+  swcMinify: true,
   typescript: {
-    ignoreBuildErrors: false // Re-enable for production
+    ignoreBuildErrors: false
   },
   webpack: (config) => {
     config.experiments = { ...config.experiments, topLevelAwait: true }
     return config
   },
-  // Add experimental features
   experimental: {
-    optimizeCss: true,
-  }
+    optimizeCss: true
+  },
+  output: 'standalone'  // Change back to standalone
 }
 
 module.exports = nextConfig
