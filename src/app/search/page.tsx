@@ -1,5 +1,10 @@
-import SearchPageClient from '@/components/SearchPageClient';
+import { Suspense } from "react"
+import SearchPage from "@/components/SearchPage"
 
-export default function SearchPage() {
-  return <SearchPageClient />;
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchPage />
+    </Suspense>
+  )
 } 

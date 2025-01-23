@@ -1,5 +1,10 @@
-import ResetPasswordClient from '@/components/ResetPasswordClient';
+import { Suspense } from "react"
+import ResetPasswordForm from "../../components/ResetPasswordForm"
 
 export default function ResetPasswordPage() {
-  return <ResetPasswordClient />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
+  )
 } 

@@ -39,8 +39,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get restaurantId from URL
-    const restaurantId = request.url.split('/restaurants/')[1].split('/favorite')[0];
+    const restaurantId = request.nextUrl.pathname.split('/restaurants/')[1].split('/favorite')[0];
+    if (!restaurantId) {
+      return NextResponse.json({ error: "Invalid restaurant ID" }, { status: 400 });
+    }
 
     const restaurant = await updateFavoriteStatus(restaurantId, session.user.email, true);
     return NextResponse.json(restaurant);
@@ -63,8 +65,10 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get restaurantId from URL
-    const restaurantId = request.url.split('/restaurants/')[1].split('/favorite')[0];
+    const restaurantId = request.nextUrl.pathname.split('/restaurants/')[1].split('/favorite')[0];
+    if (!restaurantId) {
+      return NextResponse.json({ error: "Invalid restaurant ID" }, { status: 400 });
+    }
 
     const restaurant = await updateFavoriteStatus(restaurantId, session.user.email, false);
     return NextResponse.json(restaurant);

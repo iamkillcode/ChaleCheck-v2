@@ -1,4 +1,6 @@
 // import { User } from './user'
+import { Review } from './review'
+import { User } from './user'
 
 export interface RestaurantReview {
   id: string;
@@ -15,18 +17,18 @@ export interface RestaurantReview {
 export interface Restaurant {
   id: string;
   name: string;
-  description?: string;
+  description: string | null;
   address: string;
-  phone?: string;
-  cuisine?: string;
-  priceLevel?: 1 | 2 | 3 | 4;
-  images?: string[];
-  reviews: RestaurantReview[];
-  favoritedBy?: { email: string }[];
-  isFavorited?: boolean;
-  isNew?: boolean;
+  phone: string | null;
+  cuisine: string | null;
+  priceLevel: number;
+  images: string[];
+  reviews: Review[];
+  favoritedBy: User[];
   createdAt: string;
   updatedAt: string;
+  isNew?: boolean;
+  isFavorited?: boolean;
 }
   
   
