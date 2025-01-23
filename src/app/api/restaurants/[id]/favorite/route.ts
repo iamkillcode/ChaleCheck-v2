@@ -3,11 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-// Define correct route segment config
 export const dynamic = 'force-dynamic';
-
-// Remove incorrect type definition
-// type RouteSegment = { ... }
 
 async function updateFavoriteStatus(restaurantId: string, userEmail: string, isFavorite: boolean) {
   const user = await prisma.user.findUnique({

@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendPasswordResetEmail } from "@/lib/email";
 import crypto from "crypto";
+import { Resend } from 'resend';
+
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 export async function POST(req: NextRequest) {
   try {
+    if (!resend) {
+      console.error('Resend API key is not configured');
+      return NextResponse.json(
+        { error: 'Email service not configured' },
+        { status: 500 }
+      );
+    }
+
     // Log the incoming request
     console.log('Received password reset request');
     
@@ -44,7 +56,13 @@ export async function POST(req: NextRequest) {
 
     // Send email
     try {
-      await sendPasswordResetEmail(email, resetToken);
+      await resend.emails.send({
+        from: 'ChaleCheck <noreply@chalecheck.com>',
+        to: email,
+        subject: 'Password Reset',
+        text: 'Click the link to reset your password',
+        html: `<p>Click <a href="${process.env.NEXTAUTH_URL}/reset-password?token=${resetToken}">here</a> to reset your password</p>`,
+      });
       console.log('Reset email sent successfully');
     } catch (emailError) {
       console.error('Error sending reset email:', emailError);
@@ -63,4 +81,4 @@ export async function POST(req: NextRequest) {
       error: "Failed to process password reset request" 
     }, { status: 500 });
   }
-} 
+}
