@@ -15,10 +15,10 @@ const nextConfig = {
     config.experiments = { ...config.experiments, topLevelAwait: true }
     return config
   },
+  output: 'standalone',
   experimental: {
-    optimizeCss: true
-  },
-  output: 'standalone'  // Change back to standalone
+    optimizeCss: false
+  }
 }
 
 module.exports = nextConfig
