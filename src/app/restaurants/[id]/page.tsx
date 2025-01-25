@@ -27,7 +27,7 @@ interface Restaurant {
   favoritedBy?: { email: string }[];
 }
 
-export default function RestaurantDetails({ params }: { params: Promise<{ id: string }> }) {
+export default function RestaurantDetails({ params }: { params: { id: string } }) {
   const { data: session } = useSession();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,10 +53,10 @@ export default function RestaurantDetails({ params }: { params: Promise<{ id: st
   };
 
   useEffect(() => {
-    params.then(({ id }) => {
-      fetchRestaurantData(id);
-    });
-  }, [params]);
+    if (params.id) {
+      fetchRestaurantData(params.id);
+    }
+  }, [params.id]);
 
   if (loading) return <Layout><div className="text-center py-10">Loading...</div></Layout>;
   if (error) return <Layout><div className="text-red-500 text-center py-10">{error}</div></Layout>;
