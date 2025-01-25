@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 
 /**
@@ -37,7 +39,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   render(): React.ReactNode {
     if (this.state.hasError) {
       return (
-        <div role="alert" className="p-4 text-red-500">
+        <div 
+          role="alert" 
+          className="p-4 text-red-500"
+        >
           An error occurred. Please try again later.
         </div>
       );

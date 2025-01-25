@@ -1,12 +1,14 @@
-// import { User } from './user'
-import { Review } from './review'
-import { User } from './user'
-
+/**
+ * Restaurant review interface
+ */
 export interface RestaurantReview {
   id: string;
   rating: number;
   comment: string;
+  userId: string;
+  restaurantId: string;
   createdAt: string;
+  updatedAt: string;
   user: {
     id: string;
     name: string | null;
@@ -14,6 +16,9 @@ export interface RestaurantReview {
   };
 }
 
+/**
+ * Restaurant data model interface
+ */
 export interface Restaurant {
   id: string;
   name: string;
@@ -22,13 +27,19 @@ export interface Restaurant {
   phone: string | null;
   cuisine: string | null;
   priceLevel: number;
-  images: string[];
-  reviews: Review[];
-  favoritedBy: User[];
+  isNew: boolean;
+  reviews: RestaurantReview[];
+  images: Array<{
+    id: string;
+    url: string;
+    restaurantId: string;
+  }>;
+  favoritedBy: Array<{
+    id: string;
+    email: string | null;
+  }>;
   createdAt: string;
   updatedAt: string;
-  isNew?: boolean;
-  isFavorited?: boolean;
 }
   
   

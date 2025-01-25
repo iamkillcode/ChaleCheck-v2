@@ -66,6 +66,8 @@ model Restaurant {
   address     String
   phone       String?
   cuisine     String?
+  priceLevel  Int      @default(1)
+  isNew       Boolean  @default(true)
   reviews     Review[]
   images      Image[]
   favoritedBy User[]   @relation("UserFavorites")

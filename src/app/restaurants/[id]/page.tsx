@@ -1,51 +1,33 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import Layout from '@/components/Layout';
-import ReviewForm from '@/components/ReviewForm';
-import FavoriteButton from '@/components/FavoriteButton';
-
-interface Review {
-  id: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  user: {
-    name: string;
-  };
-}
-
-interface Restaurant {
-  id: string;
-  name: string;
-  description: string | null;
-  address: string;
-  phone: string | null;
-  cuisine: string | null;
-  reviews: Review[];
-  favoritedBy?: { email: string }[];
-}
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import Layout from "@/components/Layout";
+import ReviewForm from "@/components/ReviewForm";
+import FavoriteButton from "@/components/FavoriteButton";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { RestaurantSkeleton } from "@/components/RestaurantSkeleton";
+import type { Restaurant } from "@/utils/scrapeRestaurants";
 
 export default function RestaurantDetails({ params }: { params: { id: string } }) {
   const { data: session } = useSession();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const fetchRestaurantData = async (id: string) => {
     try {
       const res = await fetch(`/api/restaurants/${id}`);
-      if (!res.ok) throw new Error('Failed to fetch restaurant details');
+      if (!res.ok) throw new Error("Failed to fetch restaurant details");
       const data = await res.json();
       setRestaurant(data);
     } catch (error) {
       if (error instanceof Error) {
-        console.error('Error fetching restaurant:', error.message);
+        console.error("Error fetching restaurant:", error.message);
         setError(error.message);
       } else {
-        console.error('Error fetching restaurant:', error);
-        setError('An unexpected error occurred');
+        console.error("Error fetching restaurant:", error);
+        setError("An unexpected error occurred");
       }
     } finally {
       setLoading(false);
@@ -58,8 +40,14 @@ export default function RestaurantDetails({ params }: { params: { id: string } }
     }
   }, [params.id]);
 
-  if (loading) return <Layout><div className="text-center py-10">Loading...</div></Layout>;
-  if (error) return <Layout><div className="text-red-500 text-center py-10">{error}</div></Layout>;
+  if (loading) return <Layout><RestaurantSkeleton /></Layout>;
+  if (error) return (
+    <Layout>
+      <ErrorBoundary>
+        <div className="text-red-500 text-center py-10">{error}</div>
+      </ErrorBoundary>
+    </Layout>
+  );
   if (!restaurant) return <Layout><div className="text-center py-10">Restaurant not found</div></Layout>;
 
   return (
@@ -69,7 +57,7 @@ export default function RestaurantDetails({ params }: { params: { id: string } }
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{restaurant.name}</h1>
-              <p className="mt-1 text-sm text-gray-500">{restaurant.cuisine || 'Various Cuisine'}</p>
+              <p className="mt-1 text-sm text-gray-500">{restaurant.cuisine || "Various Cuisine"}</p>
             </div>
             {session?.user && (
               <FavoriteButton 
@@ -85,7 +73,7 @@ export default function RestaurantDetails({ params }: { params: { id: string } }
           <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
             <div className="sm:col-span-1">
               <dt className="text-sm font-medium text-gray-500">Phone</dt>
-              <dd className="mt-1 text-sm text-gray-900">{restaurant.phone || 'Not available'}</dd>
+              <dd className="mt-1 text-sm text-gray-900">{restaurant.phone || "Not available"}</dd>
             </div>
             {restaurant.description && (
               <div className="sm:col-span-2">
@@ -121,7 +109,7 @@ export default function RestaurantDetails({ params }: { params: { id: string } }
                         <svg
                           key={i}
                           className={`h-5 w-5 ${
-                            i < review.rating ? 'text-yellow-400' : 'text-gray-300'
+                            i < review.rating ? "text-yellow-400" : "text-gray-300"
                           }`}
                           fill="currentColor"
                           viewBox="0 0 20 20"

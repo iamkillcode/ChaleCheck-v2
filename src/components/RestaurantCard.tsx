@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import FavoriteButton from './FavoriteButton';
 import { Restaurant } from '@/types/restaurant';
+import { useSession } from 'next-auth/react';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -21,9 +22,13 @@ export default function RestaurantCard({
   isAuthenticated = false 
 }: RestaurantCardProps) {
   const [isImageLoading, setIsImageLoading] = useState(true);
+  const { data: session } = useSession();
 
-  const averageRating = restaurant.reviews.reduce((acc, review) => acc + review.rating, 0) / restaurant.reviews.length;
+  const averageRating = restaurant.reviews.length 
+    ? restaurant.reviews.reduce((acc, review) => acc + review.rating, 0) / restaurant.reviews.length 
+    : 0;
   const priceLevel = restaurant.priceLevel || 2;
+  const isFavorited = restaurant.favoritedBy?.some(user => user.email === session?.user?.email) ?? false;
 
   return (
     <Link href={`/restaurants/${restaurant.id}`}>
@@ -31,7 +36,7 @@ export default function RestaurantCard({
         <div className="relative aspect-video overflow-hidden rounded-t-lg">
           {restaurant.images?.[0] ? (
             <CldImage
-              src={restaurant.images[0]}
+              src={restaurant.images[0].url}
               alt={restaurant.name}
               fill
               className={`object-cover transition-all duration-700 group-hover:scale-110 ${
@@ -46,7 +51,7 @@ export default function RestaurantCard({
             <div className="absolute top-2 right-2 z-10">
               <FavoriteButton
                 restaurantId={restaurant.id}
-                initialIsFavorited={restaurant.isFavorited ?? false}
+                initialIsFavorited={isFavorited}
               />
             </div>
           )}
