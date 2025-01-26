@@ -20,7 +20,17 @@ export default function RestaurantDetails({ params }: { params: { id: string } }
       const res = await fetch(`/api/restaurants/${id}`);
       if (!res.ok) throw new Error("Failed to fetch restaurant details");
       const data = await res.json();
-      setRestaurant(data);
+      if (!data) throw new Error("No data received");
+      
+      // Ensure all arrays are initialized
+      const restaurant = {
+        ...data,
+        reviews: Array.isArray(data.reviews) ? data.reviews : [],
+        favoritedBy: Array.isArray(data.favoritedBy) ? data.favoritedBy : [],
+        images: Array.isArray(data.images) ? data.images : []
+      };
+      
+      setRestaurant(restaurant);
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error fetching restaurant:", error.message);

@@ -2,21 +2,32 @@ import puppeteer from "puppeteer";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-/**
- * Zod schema for validating restaurant data
- */
+const UserSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+  email: z.string().nullable()
+});
+
+const ReviewSchema = z.object({
+  id: z.string(),
+  rating: z.number(),
+  comment: z.string(),
+  createdAt: z.string().or(z.date()),
+  user: UserSchema
+});
+
 const RestaurantSchema = z.object({
-  id: z.string().optional(),
+  id: z.string(),
   name: z.string().min(1, "Restaurant name is required"),
   description: z.string().nullable(),
   address: z.string().min(1, "Address is required"),
   phone: z.string().nullable(),
   cuisine: z.string().nullable(),
   priceLevel: z.number().min(1).max(4, "Price level must be between 1 and 4"),
-  reviews: z.array(z.any()).optional(),
-  favoritedBy: z.array(z.any()).optional(),
-  images: z.array(z.any()).optional(),
-  isNew: z.boolean().optional()
+  reviews: z.array(ReviewSchema).default([]),
+  favoritedBy: z.array(UserSchema).default([]),
+  images: z.array(z.object({ url: z.string() })).default([]),
+  isNew: z.boolean().default(true)
 });
 
 export type Restaurant = z.infer<typeof RestaurantSchema>;
