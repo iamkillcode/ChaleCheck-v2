@@ -11,6 +11,7 @@ export default function AddRestaurant() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [priceLevel, setPriceLevel] = useState(1);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -26,6 +27,7 @@ export default function AddRestaurant() {
       address: formData.get('address'),
       phone: formData.get('phone'),
       cuisine: formData.get('cuisine'),
+      priceLevel: priceLevel
     };
 
     try {
@@ -133,6 +135,25 @@ export default function AddRestaurant() {
                   name="cuisine"
                   id="cuisine"
                 />
+              </div>
+
+              <div>
+                <label htmlFor="priceLevel" className="block text-sm font-medium text-gray-700">
+                  Price Level
+                </label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4].map((level) => (
+                    <Button
+                      key={level}
+                      type="button"
+                      variant={priceLevel === level ? "default" : "outline"}
+                      onClick={() => setPriceLevel(level)}
+                      className="w-12 h-12"
+                    >
+                      {"$".repeat(level)}
+                    </Button>
+                  ))}
+                </div>
               </div>
 
               <Button
